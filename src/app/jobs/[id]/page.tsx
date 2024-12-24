@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Briefcase, Users, ClipboardList, Building2, Gift, Pencil, Sparkles, Calendar } from 'lucide-react';
+import { Briefcase, Users, ClipboardList, Building2, Gift, Calendar } from 'lucide-react';
 import Image from 'next/image';
 import Chart from 'chart.js/auto';
 import { ScheduleInterviewModal } from '@/components/interviews/schedule-interview-modal';
@@ -454,28 +454,39 @@ type CompareTabId = 'overview' | 'software' | 'professional' | 'experience' | 'p
 // Add new type for application detail tabs
 type ApplicationDetailTab = 'overview' | 'experience' | 'skills' | 'assessments';
 
+// Add type for schedule data
+interface ScheduleData {
+  date: string;
+  time: string;
+  type: string;
+  notes?: string;
+}
+
 export default function JobDetails() {
   const [activeTab, setActiveTab] = useState<TabId>('details');
   const [activeApplicationTab, setActiveApplicationTab] = useState<ApplicationDetailTab>('overview');
   const [selectedTalents, setSelectedTalents] = useState<string[]>([]);
-  const [showCompareModal, setShowCompareModal] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [showApplicationModal, setShowApplicationModal] = useState(false);
-  const [selectedTalent, setSelectedTalent] = useState<TalentProfile | null>(null);
-  const [showTalentModal, setShowTalentModal] = useState(false);
   const [minMatchScore, setMinMatchScore] = useState<number>(70);
   const spiderChartRef = useRef<HTMLCanvasElement>(null);
   const chartInstanceRef = useRef<Chart | null>(null);
-  const [activeCompareTab, setActiveCompareTab] = useState<CompareTabId>('overview');
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [selectedTalentForInterview, setSelectedTalentForInterview] = useState<TalentProfile | null>(null);
+
+  // Update type for tabs
+  const tabs: { id: TabId; label: string; icon: React.ComponentType }[] = [
+    { id: 'details', label: 'Details', icon: Briefcase },
+    { id: 'talents', label: 'Talent Pool', icon: Users },
+    { id: 'applications', label: 'Applications', icon: ClipboardList }
+  ];
 
   const handleInterviewRequest = (talent: TalentProfile) => {
     setSelectedTalentForInterview(talent);
     setIsScheduleModalOpen(true);
   };
 
-  const handleScheduleInterview = (scheduleData: any) => {
+  const handleScheduleInterview = (scheduleData: ScheduleData) => {
     // Here you would typically make an API call to schedule the interview
     console.log('Scheduling interview:', scheduleData);
     setIsScheduleModalOpen(false);
@@ -488,7 +499,7 @@ export default function JobDetails() {
   };
 
   const handleCompare = (talent: TalentProfile) => {
-    setSelectedTalents((prev) => {
+    setSelectedTalents((prev: string[]) => {
       if (prev.includes(talent.id)) {
         return prev.filter(id => id !== talent.id);
       }
@@ -500,25 +511,12 @@ export default function JobDetails() {
   };
 
   const handleTalentClick = (talent: TalentProfile) => {
-    setSelectedTalent(talent);
-    setShowTalentModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowTalentModal(false);
-    setSelectedTalent(null);
+    handleCompare(talent);
   };
 
   const clearSelection = () => {
     setSelectedTalents([]);
   };
-
-  // Update the tab list in the component
-  const tabs: { id: TabId; label: string; icon: any }[] = [
-    { id: 'details', label: 'Details', icon: Briefcase },
-    { id: 'talents', label: 'Talent Pool', icon: Users },
-    { id: 'applications', label: 'Applications', icon: ClipboardList }
-  ];
 
   const getEmploymentTypeEmoji = (employmentType: string) => {
     switch (employmentType) {
@@ -1862,7 +1860,7 @@ export default function JobDetails() {
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
-        {/* Tab Navigation */}
+          {/* Tab Navigation */}
           <div className="border-b border-gray-200 dark:border-gray-700">
             <nav className="-mb-px flex space-x-8">
               {tabs.map((tab) => (
@@ -1881,13 +1879,13 @@ export default function JobDetails() {
                   {tab.label}
                 </button>
               ))}
-          </nav>
-        </div>
+            </nav>
+          </div>
 
-        {/* Tab Content */}
-        {renderTabContent()}
-              </div>
-              </div>
+          {/* Tab Content */}
+          {renderTabContent()}
+        </div>
+      </div>
 
       {/* Schedule Interview Modal */}
       <ScheduleInterviewModal
