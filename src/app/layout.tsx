@@ -7,8 +7,11 @@ import { Sidebar } from '@/components/ui/sidebar';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "TalentMatch - Startup Talent Platform",
+  title: "fount.one | better hiring",
   description: "Find and hire the best talent for your startup",
+  icons: {
+    icon: '/favicon.png',
+  },
 };
 
 export default function RootLayout({
@@ -18,6 +21,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="shortcut icon" href="/favicon.png" />
+      </head>
       <body className={inter.className}>
         <Providers>
           <div className="flex">
