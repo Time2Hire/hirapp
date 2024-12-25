@@ -39,4 +39,41 @@ export interface JobAd {
   postedAt: string;
   applicants: number;
   skillMatch: number;
+}
+
+export interface CandidateProfile {
+  id: string;
+  personalInfo: {
+    name: string;
+    location: {
+      city: string;
+      country: string;
+    };
+  };
+  preferences: {
+    workLocation: string;
+    jobStatus: 'actively_searching' | 'open_to_offers';
+    salary: {
+      amount: number;
+      currency: string;
+    };
+  };
+  matchScore: number;
+  talents: Array<{
+    category: string;
+    name: string;
+    yearsOfExperience?: number;
+    rating?: string;
+  }>;
+  experiences: Array<{
+    position: string;
+    employer: string;
+    yearsOfExperience?: number;
+  }>;
+  skills: string[];
+  professionalSkills: string[];
+  languages: { language: string; level: string; verified?: boolean }[];
+  availability: string;
+  workType: string;
+  employmentType: string;
 } 
