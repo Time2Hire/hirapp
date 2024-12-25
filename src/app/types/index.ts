@@ -45,6 +45,8 @@ export interface CandidateProfile {
   id: string;
   personalInfo: {
     name: string;
+    avatar?: string;
+    description?: string;
     location: {
       city: string;
       country: string;
@@ -53,6 +55,9 @@ export interface CandidateProfile {
   preferences: {
     workLocation: string;
     jobStatus: 'actively_searching' | 'open_to_offers';
+    workTime: {
+      type: string;
+    };
     salary: {
       amount: number;
       currency: string;
@@ -69,6 +74,8 @@ export interface CandidateProfile {
     position: string;
     employer: string;
     yearsOfExperience?: number;
+    duration?: string;
+    logo?: string;
   }>;
   skills: string[];
   professionalSkills: string[];
