@@ -6,9 +6,10 @@ import { JobAd } from '@/app/types';
 interface JobPreviewFormProps {
   jobData: Partial<JobAd>;
   onBack: () => void;
+  matchingCandidates: number;
 }
 
-export function JobPreviewForm({ jobData, onBack }: JobPreviewFormProps) {
+export function JobPreviewForm({ jobData, onBack, matchingCandidates }: JobPreviewFormProps) {
   const [minMatchScore, setMinMatchScore] = useState(70);
   const [notifyNewCandidates, setNotifyNewCandidates] = useState(true);
 
@@ -117,6 +118,12 @@ export function JobPreviewForm({ jobData, onBack }: JobPreviewFormProps) {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Matching Candidates
             </h3>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                Current matching candidates
+              </span>
+              <span className="text-2xl font-bold text-primary-600">{matchingCandidates}</span>
+            </div>
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-600 dark:text-gray-300">
                 Minimum match score required

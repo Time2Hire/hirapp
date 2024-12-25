@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { JobAd } from '@/app/types';
 import { AlertCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -46,6 +46,7 @@ interface JobSkillsFormProps {
   onUpdate: (data: Partial<JobAd>) => void;
   onNext: () => void;
   matchingCandidates: number;
+  setMatchingCandidates: (value: number) => void;
 }
 
 export function JobSkillsForm({
@@ -53,11 +54,19 @@ export function JobSkillsForm({
   onUpdate,
   onNext,
   matchingCandidates,
+  setMatchingCandidates,
 }: JobSkillsFormProps) {
   const [skill, setSkill] = useState('');
   const [showNotificationDialog, setShowNotificationDialog] = useState(false);
   const [draftTitle, setDraftTitle] = useState('');
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Simulate updating matching candidates based on skills
+    const skillCount = jobData.requirements?.skills?.length || 0;
+    const newMatchingCount = Math.max(0, Math.min(10, Math.floor(skillCount * 1.5)));
+    setMatchingCandidates(newMatchingCount);
+  }, [jobData.requirements?.skills, setMatchingCandidates]);
 
   const handleAddSkill = (newSkill: string) => {
     if (newSkill.trim() && !jobData.requirements?.skills?.includes(newSkill.trim())) {
@@ -66,6 +75,8 @@ export function JobSkillsForm({
         requirements: {
           ...jobData.requirements,
           skills: updatedSkills,
+          experience: jobData.requirements?.experience || 0,
+          languages: jobData.requirements?.languages || []
         },
       });
       setSkill('');
@@ -73,11 +84,13 @@ export function JobSkillsForm({
   };
 
   const handleRemoveSkill = (skillToRemove: string) => {
-    const updatedSkills = jobData.requirements?.skills?.filter((s) => s !== skillToRemove);
+    const updatedSkills = jobData.requirements?.skills?.filter((s) => s !== skillToRemove) || [];
     onUpdate({
       requirements: {
         ...jobData.requirements,
         skills: updatedSkills,
+        experience: jobData.requirements?.experience || 0,
+        languages: jobData.requirements?.languages || []
       },
     });
   };
@@ -90,16 +103,20 @@ export function JobSkillsForm({
     onUpdate({
       requirements: {
         ...jobData.requirements,
+        skills: jobData.requirements?.skills || [],
+        experience: jobData.requirements?.experience || 0,
         languages: updatedLanguages,
       },
     });
   };
 
   const handleLanguageRemove = (index: number) => {
-    const updatedLanguages = jobData.requirements?.languages?.filter((_, i) => i !== index);
+    const updatedLanguages = jobData.requirements?.languages?.filter((_, i) => i !== index) || [];
     onUpdate({
       requirements: {
         ...jobData.requirements,
+        skills: jobData.requirements?.skills || [],
+        experience: jobData.requirements?.experience || 0,
         languages: updatedLanguages,
       },
     });
@@ -108,10 +125,12 @@ export function JobSkillsForm({
   const handleLanguageChange = (index: number, field: 'language' | 'level', value: string) => {
     const updatedLanguages = jobData.requirements?.languages?.map((lang, i) =>
       i === index ? { ...lang, [field]: value } : lang
-    );
+    ) || [];
     onUpdate({
       requirements: {
         ...jobData.requirements,
+        skills: jobData.requirements?.skills || [],
+        experience: jobData.requirements?.experience || 0,
         languages: updatedLanguages,
       },
     });
@@ -128,6 +147,8 @@ export function JobSkillsForm({
         ...jobData.compensation,
         salary: newRange,
         currency: 'EUR',
+        interval: jobData.compensation?.interval || 'year',
+        vsop: jobData.compensation?.vsop || false
       },
     });
   };
