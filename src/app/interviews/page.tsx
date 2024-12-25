@@ -38,15 +38,34 @@ interface Interview {
   };
 }
 
-interface ScheduleData {
-  candidateId: string;
-  timeSlots: string[];
-  interviewType: {
-    type: 'online' | 'offline' | 'phone';
-    platform?: string;
-    location?: string;
+interface Candidate {
+  id: string;
+  name?: string;
+  role?: string;
+  company?: string;
+  avatar?: string;
+  matchScore?: number;
+  status?: string;
+  latestExperience?: {
+    position: string;
+    company: string;
   };
+  appliedAt?: string;
 }
+
+interface ScheduleData {
+  date: string;
+  time: string;
+  type: InterviewType;
+  platform?: OnlinePlatform;
+  location?: LocationType;
+  notes?: string;
+  candidate?: Candidate;
+}
+
+type InterviewType = 'online' | 'phone' | 'offline';
+type OnlinePlatform = 'zoom' | 'teams' | 'google';
+type LocationType = 'hq' | 'alternative';
 
 // Helper function to create dates properly
 const createDate = (daysFromNow: number, hours: number, minutes: number = 0) => {
@@ -612,7 +631,7 @@ export default function InterviewsPage() {
         <ScheduleInterviewModal
           isOpen={isScheduleModalOpen}
           onClose={() => setIsScheduleModalOpen(false)}
-          onSchedule={handleScheduleInterview}
+          onSchedule={(scheduleData: ScheduleData) => handleScheduleInterview(scheduleData)}
         />
       </div>
     </div>
