@@ -348,7 +348,7 @@ export default function JobsPage() {
                         {getWorkTypeEmoji(job.workType)} {job.workType}
                       </span>
                       <span className="flex items-center">
-                        📍 {job.location.city}
+                        📍 {job.location?.city || 'Remote'}
                       </span>
                     </div>
 
