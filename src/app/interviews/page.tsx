@@ -308,7 +308,14 @@ export default function InterviewsPage() {
                       {interview.status === 'interview_requested' ? (
                         <span>Multiple time slots proposed</span>
                       ) : (
-                        new Date(interview.interview.scheduledFor).toLocaleString()
+                        new Date(interview.interview.scheduledFor).toLocaleString('en-US', {
+                          year: 'numeric',
+                          month: 'numeric',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true
+                        })
                       )}
                     </div>
                     {interview.status === 'interview_requested' && interview.interview.proposedSlots && (
@@ -319,7 +326,14 @@ export default function InterviewsPage() {
                         <div className="space-y-1">
                           {interview.interview.proposedSlots.map((slot: string, index: number) => (
                             <div key={index} className="text-sm text-gray-500 dark:text-gray-400">
-                              {new Date(slot).toLocaleString()}
+                              {new Date(slot).toLocaleString('en-US', {
+                                year: 'numeric',
+                                month: 'numeric',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: true
+                              })}
                             </div>
                           ))}
                         </div>
@@ -395,7 +409,14 @@ export default function InterviewsPage() {
                       </p>
                       <div className="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
                         <Calendar className="w-4 h-4 mr-1" />
-                        {new Date(app.interview.scheduledFor).toLocaleString()}
+                        {new Date(app.interview.scheduledFor).toLocaleString('en-US', {
+                          year: 'numeric',
+                          month: 'numeric',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true
+                        })}
                       </div>
                     </div>
                   </div>

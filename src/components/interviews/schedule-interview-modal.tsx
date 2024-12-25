@@ -240,13 +240,14 @@ export function ScheduleInterviewModal({
                         <div className="flex items-center">
                           <Clock className="w-4 h-4 mr-2 text-gray-400" />
                           <span className="text-sm text-gray-900 dark:text-white">
-                            {slot.date.toLocaleString(undefined, {
+                            {slot.date.toLocaleString('en-US', {
                               weekday: 'long',
                               year: 'numeric',
-                              month: 'long',
+                              month: 'numeric',
                               day: 'numeric',
                               hour: '2-digit',
-                              minute: '2-digit'
+                              minute: '2-digit',
+                              hour12: true
                             })}
                           </span>
                         </div>

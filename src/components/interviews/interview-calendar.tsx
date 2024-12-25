@@ -166,7 +166,7 @@ export function InterviewCalendar({ interviews, businessAppointments }: Intervie
         <div className="flex items-center">
           <CalendarIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 mr-2" />
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+            {currentDate.toLocaleString('en-US', { month: 'long', year: 'numeric' })}
           </h2>
         </div>
         <div className="flex space-x-2">

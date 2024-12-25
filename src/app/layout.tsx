@@ -10,7 +10,13 @@ export const metadata: Metadata = {
   title: "fount.one | better hiring",
   description: "Find and hire the best talent for your startup",
   icons: {
-    icon: '/favicon.png',
+    icon: [
+      {
+        url: '/favicon.png',
+        type: 'image/png'
+      }
+    ],
+    shortcut: '/favicon.png'
   },
 };
 
@@ -22,7 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="shortcut icon" href="/favicon.png" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="shortcut icon" type="image/png" href="/favicon.png" />
+        <link rel="apple-touch-icon" type="image/png" href="/favicon.png" />
       </head>
       <body className={inter.className}>
         <Providers>
