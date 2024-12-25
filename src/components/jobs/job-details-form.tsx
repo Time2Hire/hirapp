@@ -46,6 +46,7 @@ export function JobDetailsForm({ jobData, onUpdate, onBack, onNext }: JobDetails
         street,
         postalCode,
         city,
+        state: 'Berlin',
         country: 'Germany'
       } : null,
     });
