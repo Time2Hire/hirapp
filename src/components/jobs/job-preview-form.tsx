@@ -6,28 +6,9 @@ import { JobAd } from '@/app/types';
 interface JobPreviewFormProps {
   jobData: Partial<JobAd>;
   onBack: () => void;
-  matchingCandidates: number;
 }
 
-// Update the slider track styles to be more visible
-const sliderStyles = {
-  track: {
-    background: 'linear-gradient(to right, #7C3AED 0%, #7C3AED var(--progress), #E5E7EB var(--progress), #E5E7EB 100%)',
-    height: '4px',
-    borderRadius: '2px',
-  },
-  thumb: {
-    width: '16px',
-    height: '16px',
-    backgroundColor: '#7C3AED',
-    border: '2px solid #fff',
-    borderRadius: '50%',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-    cursor: 'pointer',
-  },
-};
-
-export function JobPreviewForm({ jobData, onBack, matchingCandidates }: JobPreviewFormProps) {
+export function JobPreviewForm({ jobData, onBack }: JobPreviewFormProps) {
   const [minMatchScore, setMinMatchScore] = useState(70);
   const [notifyNewCandidates, setNotifyNewCandidates] = useState(true);
 
@@ -38,11 +19,6 @@ export function JobPreviewForm({ jobData, onBack, matchingCandidates }: JobPrevi
       minMatchScore,
       notifyNewCandidates,
     });
-  };
-
-  const handleSaveAsDraft = async () => {
-    // In a real app, this would be an API call to save the job as draft
-    console.log('Saving job as draft:', jobData);
   };
 
   return (

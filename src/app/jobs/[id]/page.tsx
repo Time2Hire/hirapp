@@ -5,6 +5,7 @@ import { Briefcase, Users, ClipboardList, Building2, Gift, Calendar } from 'luci
 import Image from 'next/image';
 import Chart from 'chart.js/auto';
 import { ScheduleInterviewModal } from '@/components/interviews/schedule-interview-modal';
+import { SVGProps } from 'react';
 
 interface TalentProfile {
   id: string;
@@ -449,7 +450,8 @@ const dummyApplications: Application[] = [
 // Update the TabId type
 type TabId = 'details' | 'talents' | 'applications';
 
-type CompareTabId = 'overview' | 'software' | 'professional' | 'experience' | 'personality' | 'recommendation';
+// Add type for compare tabs
+type CompareTabId = 'overall' | 'experience' | 'skills' | 'recommendation';
 
 // Add new type for application detail tabs
 type ApplicationDetailTab = 'overview' | 'experience' | 'skills' | 'assessments';
@@ -468,17 +470,26 @@ export default function JobDetails() {
   const [selectedTalents, setSelectedTalents] = useState<string[]>([]);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [showApplicationModal, setShowApplicationModal] = useState(false);
+  const [showCompareModal, setShowCompareModal] = useState(false);
   const [minMatchScore, setMinMatchScore] = useState<number>(70);
   const spiderChartRef = useRef<HTMLCanvasElement>(null);
   const chartInstanceRef = useRef<Chart | null>(null);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
   const [selectedTalentForInterview, setSelectedTalentForInterview] = useState<TalentProfile | null>(null);
+  const [activeCompareTab, setActiveCompareTab] = useState<CompareTabId>('overall');
 
   // Update type for tabs
-  const tabs: { id: TabId; label: string; icon: React.ComponentType }[] = [
+  const tabs: { id: TabId; label: string; icon: React.FC<SVGProps<SVGSVGElement>> }[] = [
     { id: 'details', label: 'Details', icon: Briefcase },
     { id: 'talents', label: 'Talent Pool', icon: Users },
     { id: 'applications', label: 'Applications', icon: ClipboardList }
+  ];
+
+  const compareTabs: { id: CompareTabId; label: string }[] = [
+    { id: 'overall', label: 'Overall' },
+    { id: 'experience', label: 'Experience' },
+    { id: 'skills', label: 'Skills' },
+    { id: 'recommendation', label: 'Recommendation' }
   ];
 
   const handleInterviewRequest = (talent: TalentProfile) => {
@@ -549,56 +560,30 @@ export default function JobDetails() {
   };
 
   const handleShowComparison = () => {
+    if (selectedTalents.length > 0) {
     setShowCompareModal(true);
-    
-    // Wait for the canvas to be rendered
     setTimeout(() => {
       if (spiderChartRef.current) {
-        // Destroy existing chart if it exists
         if (chartInstanceRef.current) {
           chartInstanceRef.current.destroy();
         }
-
-        const selectedTalentProfiles = dummyTalents.filter(t => selectedTalents.includes(t.id));
-        
         const ctx = spiderChartRef.current.getContext('2d');
         if (ctx) {
+            const selectedTalentData = selectedTalents.map(id => dummyTalents.find(t => t.id === id)).filter(Boolean);
           chartInstanceRef.current = new Chart(ctx, {
             type: 'radar',
             data: {
-              labels: ['Technical Skills', 'Professional Skills', 'Experience', 'Language Skills', 'Match Score'],
-              datasets: selectedTalentProfiles.map(talent => ({
-                label: talent.id,
-                data: [
-                  // Average of software skill ratings
-                  talent.skillRatings.software.reduce((acc, curr) => acc + curr.rating, 0) / 
-                  talent.skillRatings.software.length,
-                  // Average of professional skill ratings
-                  talent.skillRatings.professional.reduce((acc, curr) => acc + curr.rating, 0) / 
-                  talent.skillRatings.professional.length,
-                  // Experience score (based on years)
-                  parseInt(talent.experience) * 10,
-                  // Language score (based on highest level)
-                  talent.languages.reduce((acc, curr) => {
-                    const levelScores = { 'Native': 100, 'C2': 95, 'C1': 90, 'B2': 80, 'B1': 70 };
-                    return Math.max(acc, levelScores[curr.level as keyof typeof levelScores] || 60);
-                  }, 0),
-                  // Match score
-                  talent.matchScore
-                ],
-                backgroundColor: talent.id === 'T1' ? 'rgba(99, 102, 241, 0.2)' :
-                                 talent.id === 'T2' ? 'rgba(16, 185, 129, 0.2)' :
-                                 talent.id === 'T3' ? 'rgba(245, 158, 11, 0.2)' :
-                                 'rgba(239, 68, 68, 0.2)',
-                borderColor: talent.id === 'T1' ? 'rgb(99, 102, 241)' :
-                            talent.id === 'T2' ? 'rgb(16, 185, 129)' :
-                            talent.id === 'T3' ? 'rgb(245, 158, 11)' :
-                            'rgb(239, 68, 68)',
-                borderWidth: 2,
-                pointBackgroundColor: talent.id === 'T1' ? 'rgb(99, 102, 241)' :
-                                    talent.id === 'T2' ? 'rgb(16, 185, 129)' :
-                                    talent.id === 'T3' ? 'rgb(245, 158, 11)' :
-                                    'rgb(239, 68, 68)',
+                labels: ['Technical Skills', 'Professional Skills', 'Experience', 'Communication', 'Leadership'],
+                datasets: selectedTalentData.map((talent, index) => ({
+                  label: talent?.name || '',
+                  data: [85, 90, 75, 80, 85],
+                  fill: true,
+                  backgroundColor: `rgba(${index * 100}, 99, 132, 0.2)`,
+                  borderColor: `rgb(${index * 100}, 99, 132)`,
+                  pointBackgroundColor: `rgb(${index * 100}, 99, 132)`,
+                  pointBorderColor: '#fff',
+                  pointHoverBackgroundColor: '#fff',
+                  pointHoverBorderColor: `rgb(${index * 100}, 99, 132)`
               }))
             },
             options: {
@@ -621,64 +606,7 @@ export default function JobDetails() {
         }
       }
     }, 100);
-  };
-
-  const getComparisonSummary = (talents: TalentProfile[], aspect: string) => {
-    switch (aspect) {
-      case 'software':
-        return talents.map(talent => ({
-          id: talent.id,
-          strengths: talent.skillRatings.software
-            .filter(skill => skill.rating >= 85)
-            .map(skill => skill.name),
-          weaknesses: talent.skillRatings.software
-            .filter(skill => skill.rating < 70)
-            .map(skill => skill.name)
-        }));
-      case 'professional':
-        return talents.map(talent => ({
-          id: talent.id,
-          strengths: talent.skillRatings.professional
-            .filter(skill => skill.rating >= 85)
-            .map(skill => skill.name),
-          weaknesses: talent.skillRatings.professional
-            .filter(skill => skill.rating < 70)
-            .map(skill => skill.name)
-        }));
-      case 'experience':
-        return talents.map(talent => ({
-          id: talent.id,
-          strengths: [
-            talent.experience.includes('+') ? 'Extensive experience' : 'Growing experience',
-            talent.allExperiences.length > 2 ? 'Diverse background' : 'Focused career path'
-          ],
-          weaknesses: []
-        }));
-      case 'personality':
-        return talents.map(talent => ({
-          id: talent.id,
-          strengths: talent.personality.strengths,
-          weaknesses: talent.personality.weaknesses
-        }));
-      default:
-        return [];
     }
-  };
-
-  // Update the getHiringRecommendation function type
-  interface HiringRecommendation {
-    id: string;
-    recommendation: string;
-    bestFitFor: string;
-  }
-
-  const getHiringRecommendation = (talents: TalentProfile[]): HiringRecommendation[] => {
-    return talents.map(talent => ({
-      id: talent.id,
-      recommendation: `Based on ${talent.name}'s skills and experience...`, // Add your recommendation logic here
-      bestFitFor: talent.matchScore > 90 ? 'Ideal candidate' :
-                  talent.matchScore > 75 ? 'Strong candidate' : 'Potential candidate'
-    }));
   };
 
   // Add helper function for status badge
@@ -999,23 +927,34 @@ export default function JobDetails() {
         );
       case 'talents':
         return (
-          <>
-            {/* Header */}
-            <div className="flex justify-between items-center mb-6">
-              <div className="text-lg font-semibold text-gray-900 dark:text-white">
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-4">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                 Talent Pool
+              </h2>
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  {dummyTalents.filter(t => t.matchScore >= minMatchScore).length} candidates match your criteria
+                </span>
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                {dummyTalents.filter(t => t.matchScore >= minMatchScore).length} candidates match your criteria
-              </div>
+              <div className="flex items-center space-x-4">
               {selectedTalents.length > 0 && (
+                  <>
+                    <button
+                      onClick={clearSelection}
+                      className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                    >
+                      Clear Selection ({selectedTalents.length})
+                    </button>
                 <button
-                  onClick={clearSelection}
-                  className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                  onClick={handleShowComparison}
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700"
                 >
-                  Clear Selection ({selectedTalents.length})
+                      Compare Selected
                 </button>
+                  </>
               )}
+              </div>
             </div>
 
             {/* Main Content */}
@@ -1250,7 +1189,7 @@ export default function JobDetails() {
                   ))}
               </div>
             </div>
-          </>
+          </div>
         );
       case 'applications':
         return (
@@ -1841,20 +1780,7 @@ export default function JobDetails() {
     setShowApplicationModal(false);
   };
 
-  // Update the recommendation section
-  const renderRecommendations = (talents: TalentProfile[]) => {
-    const recommendations = getHiringRecommendation(talents);
-    return recommendations.map((rec: HiringRecommendation) => (
-      <div key={rec.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-        <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-          Talent {rec.id} - {rec.bestFitFor}
-        </h4>
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          {rec.recommendation}
-        </p>
-      </div>
-    ));
-  };
+ 
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -1894,6 +1820,142 @@ export default function JobDetails() {
         onSchedule={handleScheduleInterview}
         preselectedCandidate={selectedTalentForInterview}
       />
+
+      {/* Compare Modal */}
+      {showCompareModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" onClick={() => setShowCompareModal(false)}>
+              <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75"></div>
+            </div>
+
+            <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+              <div className="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="mb-4 border-b border-gray-200 dark:border-gray-700">
+                  <nav className="-mb-px flex space-x-8">
+                    {compareTabs.map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveCompareTab(tab.id)}
+                        className={`
+                          whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                          ${activeCompareTab === tab.id
+                            ? 'border-primary-500 text-primary-600 dark:text-primary-500'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                          }
+                        `}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </nav>
+                </div>
+                <div className="mt-4">
+                  {activeCompareTab === 'overall' && (
+                    <div>
+                      <canvas ref={spiderChartRef} className="w-full max-w-2xl mx-auto" />
+                    </div>
+                  )}
+                  {activeCompareTab === 'experience' && (
+                    <div className="grid grid-cols-3 gap-4">
+                      {selectedTalents.map(talentId => {
+                        const talent = dummyTalents.find(t => t.id === talentId);
+                        if (!talent) return null;
+                        return (
+                          <div key={talent.id} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h4 className="font-medium mb-2">{talent.name}</h4>
+                            {talent.allExperiences.map((exp, index) => (
+                              <div key={index} className="mb-3">
+                                <div className="font-medium">{exp.position}</div>
+                                <div className="text-sm text-gray-600 dark:text-gray-300">{exp.company}</div>
+                                <div className="text-sm text-gray-500">{exp.duration}</div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {activeCompareTab === 'skills' && (
+                    <div className="grid grid-cols-3 gap-4">
+                      {selectedTalents.map(talentId => {
+                        const talent = dummyTalents.find(t => t.id === talentId);
+                        if (!talent) return null;
+                        return (
+                          <div key={talent.id} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h4 className="font-medium mb-2">{talent.name}</h4>
+                            <div className="mb-4">
+                              <h5 className="text-sm font-medium mb-2">Technical Skills</h5>
+                              <div className="flex flex-wrap gap-2">
+                                {talent.skills.map(skill => (
+                                  <span key={skill} className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                    {skill}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                            <div>
+                              <h5 className="text-sm font-medium mb-2">Professional Skills</h5>
+                              <div className="flex flex-wrap gap-2">
+                                {talent.professionalSkills.map(skill => (
+                                  <span key={skill} className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                    {skill}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {activeCompareTab === 'recommendation' && (
+                    <div className="grid grid-cols-3 gap-4">
+                      {selectedTalents.map(talentId => {
+                        const talent = dummyTalents.find(t => t.id === talentId);
+                        if (!talent) return null;
+                        return (
+                          <div key={talent.id} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h4 className="font-medium mb-2">{talent.name}</h4>
+                            <div className="text-lg font-semibold text-primary-600 mb-2">
+                              {talent.matchScore}% Match
+                            </div>
+                            <div className="mb-4">
+                              <h5 className="text-sm font-medium mb-2">Strengths</h5>
+                              <ul className="list-disc list-inside text-sm">
+                                {talent.personality.strengths.map((strength, index) => (
+                                  <li key={index} className="text-gray-600 dark:text-gray-300">{strength}</li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div>
+                              <h5 className="text-sm font-medium mb-2">Areas for Growth</h5>
+                              <ul className="list-disc list-inside text-sm">
+                                {talent.personality.weaknesses.map((weakness, index) => (
+                                  <li key={index} className="text-gray-600 dark:text-gray-300">{weakness}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <button
+                  type="button"
+                  onClick={() => setShowCompareModal(false)}
+                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:ml-3 sm:w-auto sm:text-sm"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

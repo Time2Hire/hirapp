@@ -1,14 +1,38 @@
 'use client';
 
 import { useState } from 'react';
-import { Calendar, Clock, MapPin, Video, Phone, Building2, X, Check } from 'lucide-react';
-import Image from 'next/image';
+import { Clock, Video, Phone, Building2, X, } from 'lucide-react';
+
+interface Candidate {
+  id: string;
+  name?: string;
+  role?: string;
+  company?: string;
+  avatar?: string;
+  matchScore?: number;
+  status?: string;
+  latestExperience?: {
+    position: string;
+    company: string;
+  };
+  appliedAt?: string;
+}
+
+interface ScheduleData {
+  date: string;
+  time: string;
+  type: InterviewType;
+  platform?: OnlinePlatform;
+  location?: LocationType;
+  notes?: string;
+  candidate?: Candidate;
+}
 
 interface ScheduleInterviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  preselectedCandidate?: any; // Will be typed properly when we have the candidate type
-  onSchedule: (scheduleData: any) => void; // Will be typed properly
+  preselectedCandidate?: Candidate | null;
+  onSchedule: (scheduleData: ScheduleData) => void;
 }
 
 type InterviewType = 'online' | 'phone' | 'offline';
@@ -27,7 +51,9 @@ export function ScheduleInterviewModal({
   onSchedule
 }: ScheduleInterviewModalProps) {
   const [step, setStep] = useState(1);
-  const [selectedCandidate, setSelectedCandidate] = useState(preselectedCandidate || null);
+  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | undefined>(
+    preselectedCandidate || undefined
+  );
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<TimeSlot[]>([]);
   const [interviewTypes, setInterviewTypes] = useState<{
     type: InterviewType;
@@ -35,6 +61,10 @@ export function ScheduleInterviewModal({
     location?: LocationType;
     alternativeAddress?: string;
   }[]>([]);
+  const [interviewType] = useState<InterviewType>('online');
+  const [onlinePlatform] = useState<OnlinePlatform>('teams');
+  const [officeLocation] = useState<LocationType>('hq');
+  const [notes] = useState('');
 
   // Mock data for new applications
   const newApplications = [
@@ -86,12 +116,20 @@ export function ScheduleInterviewModal({
     setStep(step - 1);
   };
 
-  const handleSubmit = () => {
-    onSchedule({
-      candidate: selectedCandidate,
-      timeSlots: selectedTimeSlots,
-      interviewTypes
-    });
+  const handleSchedule = () => {
+    if (!selectedTimeSlots.length) return;
+    
+    const selectedSlot = selectedTimeSlots[0];
+    const scheduleData: ScheduleData = {
+      date: selectedSlot.date.toISOString().split('T')[0],
+      time: '09:00', // Default time or you can add time selection
+      type: interviewType,
+      ...(interviewType === 'online' && { platform: onlinePlatform }),
+      ...(interviewType === 'offline' && { location: officeLocation }),
+      notes,
+      ...(selectedCandidate && { candidate: selectedCandidate })
+    };
+    onSchedule(scheduleData);
     onClose();
   };
 
@@ -402,7 +440,7 @@ export function ScheduleInterviewModal({
             ) : (
               <button
                 type="button"
-                onClick={handleSubmit}
+                onClick={handleSchedule}
                 disabled={interviewTypes.length === 0}
                 className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >

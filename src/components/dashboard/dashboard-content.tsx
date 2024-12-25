@@ -173,7 +173,7 @@ export function DashboardContent() {
                     Coming Soon: Workforce Analytics
                   </h3>
                   <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    Analyze your team's skills and make data-driven hiring decisions
+                    Analyze your teams skills and make data-driven hiring decisions
                   </p>
                   <button className="mt-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
                     Join waitlist →

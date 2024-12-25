@@ -7,17 +7,10 @@ import {
   Bell,
   Shield,
   Globe,
-  LogOut,
-  Trash2,
-  Mail,
-  Smartphone,
-  Key,
-  FileText,
-  Download,
   AlertCircle,
-  ToggleLeft,
-  Settings as SettingsIcon
+  LucideIcon,
 } from 'lucide-react';
+import Image from 'next/image';
 
 interface SettingOption {
   id: string;
@@ -78,7 +71,7 @@ interface Section {
   id: string;
   title: string;
   description: string;
-  icon: any; // Using any for Lucide icons
+  icon: LucideIcon;
   settings: Setting[];
 }
 
@@ -94,7 +87,7 @@ const sections: Section[] = [
         title: 'Profile Picture',
         description: 'Update your profile picture',
         type: 'image',
-        current: '/images/user/Logo.png'
+        current: '/images/avatar.png'
       },
       {
         id: 'notifications',
@@ -204,7 +197,7 @@ export default function SettingsPage() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [settings, setSettings] = useState<Section[]>(sections);
 
-  const handleSettingChange = (sectionId: string, settingId: string, value: any) => {
+  const handleSettingChange = (sectionId: string, settingId: string, value: boolean | string | { start?: string; end?: string }) => {
     setSettings(prevSettings => 
       prevSettings.map(section => {
         if (section.id === sectionId) {
@@ -227,7 +220,7 @@ export default function SettingsPage() {
                   case 'time-range':
                     return {
                       ...setting,
-                      current: { ...setting.current, ...value }
+                      current: { ...setting.current, ...(value as { start?: string; end?: string }) }
                     };
                   default:
                     return setting;
@@ -242,7 +235,7 @@ export default function SettingsPage() {
     );
   };
 
-  const handleAction = (settingId: string, action: string) => {
+  const handleAction = (settingId: string, actionType: 'change' | 'view' | 'download') => {
     switch (settingId) {
       case 'delete-account':
         setShowDeleteConfirm(true);
@@ -250,8 +243,24 @@ export default function SettingsPage() {
       case 'password':
         setShowPasswordModal(true);
         break;
-      // Add more cases as needed
+      case 'data-processing':
+        if (actionType === 'view') {
+          // Handle viewing DPA
+          console.log('Viewing DPA');
+        }
+        break;
+      case 'export-data':
+        if (actionType === 'download') {
+          // Handle data export
+          console.log('Exporting data');
+        }
+        break;
     }
+  };
+
+  const handleImageChange = (sectionId: string, settingId: string) => {
+    // Here you would typically handle file upload
+    console.log('Changing image for', sectionId, settingId);
   };
 
   return (
@@ -396,6 +405,30 @@ export default function SettingsPage() {
                                   onChange={(e) => handleSettingChange(section.id, setting.id, { end: e.target.value })}
                                   className="block w-32 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md"
                                 />
+                              </div>
+                            )}
+
+                            {setting.type === 'image' && (
+                              <div className="mt-3">
+                                <div className="flex items-center space-x-4">
+                                  <div className="relative w-20 h-20 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
+                                    <Image
+                                      src={setting.current}
+                                      alt="Profile picture"
+                                      width={80}
+                                      height={80}
+                                      priority
+                                      className="object-cover w-full h-full"
+                                      unoptimized
+                                    />
+                                  </div>
+                                  <button
+                                    onClick={() => handleImageChange(section.id, setting.id)}
+                                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                                  >
+                                    Change Photo
+                                  </button>
+                                </div>
                               </div>
                             )}
                           </div>

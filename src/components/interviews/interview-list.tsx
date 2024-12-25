@@ -8,6 +8,31 @@ interface InterviewListProps {
   type: 'upcoming' | 'past';
 }
 
+interface Participant {
+  name: string;
+  avatar: string;
+}
+
+interface Candidate {
+  name: string;
+  role: string;
+  avatar: string;
+  company: string;
+}
+
+interface Interview {
+  id: number;
+  candidate: Candidate;
+  date: string;
+  time: string;
+  duration: number;
+  type: string;
+  stage: string;
+  status: string;
+  feedback?: string;
+  participants: Participant[];
+}
+
 const interviews = [
   {
     id: 1,
@@ -69,7 +94,7 @@ const interviews = [
 ];
 
 export function InterviewList({ type }: InterviewListProps) {
-  const [selectedInterview, setSelectedInterview] = useState<any>(null);
+  const [selectedInterview, setSelectedInterview] = useState<Interview | null>(null);
 
   const filteredInterviews = interviews.filter(interview => {
     const interviewDate = new Date(interview.date);
@@ -183,7 +208,7 @@ export function InterviewList({ type }: InterviewListProps) {
                     </div>
                   </div>
                   <div className="flex -space-x-2">
-                    {interview.participants.map((participant: any, index: number) => (
+                    {interview.participants.map((participant: Participant, index: number) => (
                       <Image
                         key={index}
                         src={participant.avatar}

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Camera, Pencil, Trash2, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
+import { Camera, Twitter, Linkedin, Instagram } from 'lucide-react';
 
 export function CompanyDetails() {
   const [logo, setLogo] = useState<string>('/images/user/Logo.png');

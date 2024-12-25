@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CompanyDetails } from '@/components/company/company-details';
 import { BillingInformation } from '@/components/company/billing-information';

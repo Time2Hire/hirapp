@@ -46,7 +46,6 @@ interface JobSkillsFormProps {
   onUpdate: (data: Partial<JobAd>) => void;
   onNext: () => void;
   matchingCandidates: number;
-  setMatchingCandidates: (count: number) => void;
 }
 
 export function JobSkillsForm({
@@ -54,7 +53,6 @@ export function JobSkillsForm({
   onUpdate,
   onNext,
   matchingCandidates,
-  setMatchingCandidates,
 }: JobSkillsFormProps) {
   const [skill, setSkill] = useState('');
   const [showNotificationDialog, setShowNotificationDialog] = useState(false);
